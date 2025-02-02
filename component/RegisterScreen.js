@@ -1,27 +1,33 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
-import styles from '../styles/LoginStyles';
+import styles from '../styles/RegisterStyles';
 
-const LoginScreen = ({ navigation }) => {
+const RegisterScreen = ({ navigation }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleLogin = () => {
-    signInWithEmailAndPassword(auth, email, password)
+  const handleRegister = () => {
+    if (password !== confirmPassword) {
+      setError("Passwords don't match");
+      return;
+    }
+
+    createUserWithEmailAndPassword(auth, email, password)
       .then(() => {
         navigation.navigate('Home');
       })
       .catch(error => {
-        setError("ไม่สามารถเข้าสู่นะบบได้" + error.message);
+        setError(error.message);
       });
   };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+      <Text style={styles.title}>Register</Text>
       {error ? <Text style={styles.error}>{error}</Text> : null}
       <TextInput
         style={styles.input}
@@ -37,10 +43,16 @@ const LoginScreen = ({ navigation }) => {
         value={password}
         onChangeText={setPassword}
       />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Register" onPress={() => navigation.navigate('Register')} />
+      <TextInput
+        style={styles.input}
+        placeholder="Confirm Password"
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
+      <Button title="Register" onPress={handleRegister} />
     </View>
   );
 };
 
-export default LoginScreen;
+export default RegisterScreen;
